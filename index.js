@@ -1,0 +1,1 @@
+//dedicated js files per page
