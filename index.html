@@ -1,12 +1,140 @@
-<!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Home - Ladespot</title>
-  </head>
-  <body>
-    HTML base structure für die Startseite
-    <a href="maptest.html"> Maptest Link </a>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LadeSpot.de - Startseite</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">LadeSpot.de</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">Startseite</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="login.html">Login/Registration</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="kontakt.html">Kontakt</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hauptinhalt -->
+    <div class="container mt-5">
+        <h1>LadeSpot.de</h1>
+        <p>Willkommen bei LadeSpot.de! Finden Sie Ihre nächste Ladestation:</p>
+
+        <!-- Suchleiste -->
+        <input type="text" id="searchBar" class="form-control" placeholder="Nach Standort suchen...">
+
+        <!-- Ladestationen Liste -->
+        <div class="list-group mt-3" id="stationList">
+            <a href="#" class="list-group-item list-group-item-action">Station A</a>
+            <a href="#" class="list-group-item list-group-item-action">Station B</a>
+            <a href="#" class="list-group-item list-group-item-action">Station C</a>
+            <!-- Weitere Stationen hier... -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container p-4">
+            <div class="text-center">
+                <a href="#" data-toggle="modal" data-target="#impressumModal" class="text-dark">Impressum</a> | 
+                <a href="#" data-toggle="modal" data-target="#datenschutzModal" class="text-dark">Datenschutz</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Impressum Modal -->
+    <div class="modal fade" id="impressumModal" tabindex="-1" aria-labelledby="impressumLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="impressumLabel">Impressum</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Hier stehen die vollständigen Impressumsinformationen.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datenschutz Modal -->
+    <div class="modal fade" id="datenschutzModal" tabindex="-1" aria-labelledby="datenschutzLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="datenschutzLabel">Datenschutz</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Hier stehen die vollständigen Datenschutzinformationen.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS und Abhängigkeiten -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Einfache Such- und Filterfunktion
+        document.getElementById('searchBar').addEventListener('input', function() {
+            let filter = this.value.toUpperCase();
+            let listItems = document.getElementById("stationList").getElementsByTagName('a');
+            for (let i = 0; i < listItems.length; i++) {
+                let txtValue = listItems[i].textContent || listItems[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    listItems[i].style.display = "";
+                } else {
+                    listItems[i].style.display = "none";
+                }
+            }
+        });
+    </script>
+</body>
 </html>
