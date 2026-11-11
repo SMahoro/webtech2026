@@ -7,17 +7,73 @@
 	  </script>
   </head>
   <body>
-    <div id="map" style="height: 400px"></div>
+    <div id="map" style="height: 98vh"></div>
 
     <script type="module">
-      import {LeafletMap, TileLayer} from 'leaflet';
+      import {LeafletMap, Marker, TileLayer} from 'leaflet';
       
-      const map = new LeafletMap('map').setView([51.505, -0.09], 13);
+      const map = new LeafletMap('map').setView([51.1657, 10.4515], 6); 
 
-      new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+      new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
+      
+      async function loadAllCityMarkers() { 
+        try { 
+          const response = await fetch('https://infranode.dev/api/v1/cities'); 
+        
+          if (!response.ok) { throw new Error(`Fehler beim Abrufen der Daten (Status: ${response.status})`);
+        } 
+        
+        const responseData = await response.json(); 
+        const cities = responseData.data;
+        //const bounds = [];         
+
+        cities.forEach(city => {  
+          if (city.geo && city.geo.lat && city.geo.lon) { 
+            const { lat, lon } = city.geo; 
+            
+            const marker = new Marker([lat, lon]).addTo(map); 
+
+            marker.bindPopup(`<b>${city.name_de}</b><br /> Einwohner: ${city.population ? city.population.toLocaleString() : 'Keine Angabe'}<br />
+            <em>Ladesäulen werden geladen...</em>
+            `);
+
+            marker.on('click', async () => { 
+              try { 
+                const res = await fetch(`https://infranode.dev/api/v1/cities/${city.slug}/charging`);
+
+                if (!res.ok) { 
+                  throw new Error(`API-Fehler ${res.status}`); 
+                } const chargingData = await res.json(); 
+                
+                const count = chargingData.data.payload.count; 
+                
+                marker.setPopupContent(` <b>${city.name_de}</b><br /> Einwohner: ${city.population ? city.population.toLocaleString('de-DE') : 'Keine Angabe'}<br /> <b>Ladesäulen gesamt: ${count}</b>`); 
+              } 
+              catch (err) { 
+                console.error(`Fehler beim Laden der Ladesäulen für ${city.slug}:`, err); 
+
+                marker.setPopupContent(` <b>${city.name_de}</b><br /> Ladesäulen-Daten konnten nicht geladen werden.`); 
+              } 
+            }); 
+          } }); 
+        } 
+        catch (error) { console.error('Fehler beim Laden der Städte-Marker:', error); }
+        
+        /*bounds.push([lat, lon]); 
+        
+        if (bounds.length > 0) { map.fitBounds(bounds); } } catch (error) { console.error('Fehler beim Laden der Städte-Marker:', error); } */
+      } 
+          
+      loadAllCityMarkers();
+
+      /*const res = await fetch("https://infranode.dev/api/v1/cities");
+      const data = await res.json();
+      console.log(data.data[0].geo.lat);*/
+
+      /*const response = await fetch('https://infranode.dev/api/v1/cities/berlin/charging'); 
+      const data = await response.json();
+      console.log(data.data.payload.count);*/
+
 	  </script>
   </body>
 </html>
