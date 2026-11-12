@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -6,25 +7,12 @@
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            flex: 1;
-        }
-
-        footer {
-            background-color: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-        }
+        html, body { height: 100%; margin: 0; }
+        body { display: flex; flex-direction: column; }
+        .container { flex: 1; }
+        footer { background-color: #f8f9fa; padding: 20px; text-align: center; }
+        .content { display: none; }
+        .content.active { display: block; }
     </style>
 </head>
 <body>
@@ -37,33 +25,68 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Startseite</a>
+                    <a class="nav-link" href="#" onclick="showContent('startseite')">Startseite</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="login.html">Login/Registration</a>
+                    <a class="nav-link" href="#" onclick="showContent('login')">Login/Registration</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="kontakt.html">Kontakt</a>
+                    <a class="nav-link" href="#" onclick="showContent('kontakt')">Kontakt</a>
                 </li>
             </ul>
         </div>
     </nav>
 
     <!-- Hauptinhalt -->
-    <div class="container mt-5">
+    <div id="startseite" class="container content active">
         <h1>LadeSpot.de</h1>
         <p>Willkommen bei LadeSpot.de! Finden Sie Ihre nächste Ladestation:</p>
-
         <!-- Suchleiste -->
         <input type="text" id="searchBar" class="form-control" placeholder="Nach Standort suchen...">
-
         <!-- Ladestationen Liste -->
         <div class="list-group mt-3" id="stationList">
             <a href="#" class="list-group-item list-group-item-action">Station A</a>
             <a href="#" class="list-group-item list-group-item-action">Station B</a>
             <a href="#" class="list-group-item list-group-item-action">Station C</a>
-            <!-- Weitere Stationen hier... -->
         </div>
+    </div>
+
+    <!-- Login/Register Inhalt -->
+    <div id="login" class="container content">
+        <h1>Login oder Registrierung</h1>
+        <form>
+            <div class="form-group">
+                <label for="email">E-Mail-Adresse:</label>
+                <input type="email" class="form-control" id="email" placeholder="E-Mail eingeben">
+            </div>
+            <div class="form-group">
+                <label for="password">Passwort:</label>
+                <input type="password" class="form-control" id="password" placeholder="Passwort eingeben">
+            </div>
+            <button type="submit" class="btn btn-primary">Einloggen</button>
+            <a href="#" class="btn btn-secondary">Registrieren</a>
+        </form>
+    </div>
+
+    <!-- Kontakt Inhalt -->
+    <div id="kontakt" class="container content">
+        <h1>Kontakt</h1>
+        <p>Haben Sie Fragen? Kontaktieren Sie uns!</p>
+        <form>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" placeholder="Name eingeben">
+            </div>
+            <div class="form-group">
+                <label for="email">E-Mail-Adresse:</label>
+                <input type="email" class="form-control" id="email" placeholder="E-Mail eingeben">
+            </div>
+            <div class="form-group">
+                <label for="message">Nachricht:</label>
+                <textarea class="form-control" id="message" rows="4" placeholder="Ihre Nachricht"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Nachricht senden</button>
+        </form>
     </div>
 
     <!-- Footer -->
@@ -78,42 +101,42 @@
 
     <!-- Impressum Modal -->
     <div class="modal fade" id="impressumModal" tabindex="-1" aria-labelledby="impressumLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="impressumLabel">Impressum</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Hier stehen die vollständigen Impressumsinformationen.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
-          </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="impressumLabel">Impressum</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Hier stehen die vollständigen Impressumsinformationen.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Datenschutz Modal -->
     <div class="modal fade" id="datenschutzModal" tabindex="-1" aria-labelledby="datenschutzLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="datenschutzLabel">Datenschutz</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Hier stehen die vollständigen Datenschutzinformationen.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
-          </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="datenschutzLabel">Datenschutz</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Hier stehen die vollständigen Datenschutzinformationen.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Bootstrap JS und Abhängigkeiten -->
@@ -122,7 +145,13 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Einfache Such- und Filterfunktion
+        function showContent(id) {
+            document.querySelectorAll('.content').forEach(function(element) {
+                element.classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+        }
+
         document.getElementById('searchBar').addEventListener('input', function() {
             let filter = this.value.toUpperCase();
             let listItems = document.getElementById("stationList").getElementsByTagName('a');
