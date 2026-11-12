@@ -7,73 +7,111 @@
 	  </script>
   </head>
   <body>
-    <div id="map" style="height: 98vh"></div>
+    <div id="map" style="height: 95vh; margin-top: 4vh;"></div>
 
     <script type="module">
-      import {LeafletMap, Marker, TileLayer} from 'leaflet';
+      import {LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       
-      const map = new LeafletMap('map').setView([51.1657, 10.4515], 6); 
+      const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); 
 
       new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
       
-      async function loadAllCityMarkers() { 
+      //Layers
+      const cityLayer = new LayerGroup().addTo(map);
+      const stationsLayer = new LayerGroup();
+
+      //Zwischenspeicher
+      const loadedCities = new Set();
+      let citiesData = [];
+
+      //Städtemarker (Zoomstufe 6-8)
+      async function loadCityMarkers() { 
         try { 
-          const response = await fetch('https://infranode.dev/api/v1/cities'); 
-        
-          if (!response.ok) { throw new Error(`Fehler beim Abrufen der Daten (Status: ${response.status})`);
-        } 
-        
-        const responseData = await response.json(); 
-        const cities = responseData.data;
-        //const bounds = [];         
+          const responseCities = await fetch('https://infranode.dev/api/v1/cities'); 
 
-        cities.forEach(city => {  
-          if (city.geo && city.geo.lat && city.geo.lon) { 
-            const { lat, lon } = city.geo; 
-            
-            const marker = new Marker([lat, lon]).addTo(map); 
+          const responseDataCities = await responseCities.json(); 
+          citiesData = responseDataCities.data || [];              
 
-            marker.bindPopup(`<b>${city.name_de}</b><br /> Einwohner: ${city.population ? city.population.toLocaleString() : 'Keine Angabe'}<br />
-            <em>Ladesäulen werden geladen...</em>
-            `);
+          citiesData.forEach(city => {  
+            if (city.geo) { 
+              const { lat, lon } = city.geo; 
+              const cityMarker = new Marker([lat, lon]); 
 
-            marker.on('click', async () => { 
-              try { 
-                const res = await fetch(`https://infranode.dev/api/v1/cities/${city.slug}/charging`);
+              cityMarker.bindPopup(
+                `<b>${city.name_de}</b><br />
+                Klicke zum Heranzoomen`);
 
-                if (!res.ok) { 
-                  throw new Error(`API-Fehler ${res.status}`); 
-                } const chargingData = await res.json(); 
-                
-                const count = chargingData.data.payload.count; 
-                
-                marker.setPopupContent(` <b>${city.name_de}</b><br /> Einwohner: ${city.population ? city.population.toLocaleString('de-DE') : 'Keine Angabe'}<br /> <b>Ladesäulen gesamt: ${count}</b>`); 
-              } 
-              catch (err) { 
-                console.error(`Fehler beim Laden der Ladesäulen für ${city.slug}:`, err); 
+              cityMarker.on('pointerover', function () { this.openPopup(); }); 
+              
+              cityMarker.on('pointerout', function () { this.closePopup(); });
 
-                marker.setPopupContent(` <b>${city.name_de}</b><br /> Ladesäulen-Daten konnten nicht geladen werden.`); 
-              } 
-            }); 
-          } }); 
-        } 
-        catch (error) { console.error('Fehler beim Laden der Städte-Marker:', error); }
-        
-        /*bounds.push([lat, lon]); 
-        
-        if (bounds.length > 0) { map.fitBounds(bounds); } } catch (error) { console.error('Fehler beim Laden der Städte-Marker:', error); } */
+              cityMarker.on('click', () => { 
+                map.setView([lat, lon], 10); 
+              });
+              
+              cityLayer.addLayer(cityMarker); 
+            } 
+          }); 
+        } catch (error) {
+          console.error('Fehler beim Laden der Städte-Marker:', error); 
+        }
       } 
+      
+      //Ladesäulenmarker
+      async function loadCityStations(citySlug) { 
+        if (loadedCities.has(citySlug)) return; //Abbruch, wenn bereits geladen
+        loadedCities.add(citySlug);
+
+        try { 
+          const responseCharging = await fetch(`https://infranode.dev/api/v1/cities/${citySlug}/charging`);
+         
+          const responseDataCharging = await responseCharging.json(); 
+          const chargingStations = responseDataCharging.data.payload.stations || []; 
           
-      loadAllCityMarkers();
+          chargingStations.forEach(station => { 
+            if (station.lat && station.lon) { 
 
-      /*const res = await fetch("https://infranode.dev/api/v1/cities");
-      const data = await res.json();
-      console.log(data.data[0].geo.lat);*/
+              //Ladesäulenmarker
+              const stationMarker = new Marker([station.lat, station.lon]); 
+            
+              stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
 
-      /*const response = await fetch('https://infranode.dev/api/v1/cities/berlin/charging'); 
-      const data = await response.json();
-      console.log(data.data.payload.count);*/
+              stationMarker.on('pointerover', function () { this.openPopup(); }); 
+              
+              stationMarker.on('pointerout', function () { this.closePopup(); });
+              
+              // Zur Detail-Ebene hinzufügen stationsLayer.
+              stationsLayer.addLayer(stationMarker);  
+            }
+          });
+        } catch (err) { 
+          console.error(`Fehler beim Laden der Säulen für ${citySlug}:`, err); 
+        } 
+      }
 
+      map.on('moveend', () => { 
+        const currentZoom = map.getZoom();
+        const bounds = map.getBounds();
+
+        if (currentZoom <= 8) { 
+          // Bei Zoom 6-8: Nur Städte-Cluster anzeigen 
+          if (!map.hasLayer(cityLayer)) map.addLayer(cityLayer); if (map.hasLayer(stationsLayer)) map.removeLayer(stationsLayer); 
+        } else { 
+          // Bei Zoom > 8: Einzelne Ladesäulen anzeigen 
+          if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer); 
+          if (!map.hasLayer(stationsLayer)) map.addLayer(stationsLayer); 
+
+          citiesData.forEach(city => { 
+            if (city.geo.lat && city.geo.lon) { 
+              if (bounds.contains([city.geo.lat, city.geo.lon])) { 
+                loadCityStations(city.slug); 
+              } 
+            } 
+          });
+        } 
+      });
+
+      loadCityMarkers();
 	  </script>
   </body>
 </html>
