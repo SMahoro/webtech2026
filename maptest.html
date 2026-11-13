@@ -2,17 +2,74 @@
 <html>
   <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.css">
+    <style>
+      #main { 
+        display: flex; 
+        height: 95vh;
+        margin-top: 4vh;
+        gap: 15px; 
+        font-family: sans-serif; } 
+
+      #map { 
+        flex: 3; 
+        height: 100%; 
+        border-radius: 8px; } 
+
+      aside { 
+        flex: 1;  
+        background: #f8f9fa; 
+        padding: 15px; 
+        border-radius: 8px; 
+        overflow-y: auto; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); } 
+
+      .fav-list { 
+        list-style: none; 
+        padding: 0; margin: 0; } 
+      
+      .fav-item { 
+        background: white; 
+        padding: 10px;
+         margin-bottom: 8px; 
+         border-radius: 6px; 
+         border-left: 4px solid #e74c3c; 
+         cursor: pointer; 
+         transition: transform 0.15s ease, box-shadow 0.15s ease; } 
+         
+      .fav-item:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); } 
+        
+      .fav-item h4 { 
+        margin: 0 0 5px 0; 
+        font-size: 14px; } 
+        
+      .fav-item p { 
+        margin: 0; 
+        font-size: 12px; 
+        color: #666; }
+    </style>
 	  <script type="importmap">
 		  {"imports": {"leaflet": "https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.js"}}
 	  </script>
   </head>
   <body>
-    <div id="map" style="height: 95vh; margin-top: 4vh;"></div>
+    <div id="main">
+      <div id="map"></div>
+
+      <aside> 
+        <h2>Meine Favoriten</h2> 
+        <ul> 
+          <li>Noch keine Favoriten gespeichert.</li> 
+        </ul> 
+      </aside>
+    </div>
 
     <script type="module">
-      import {LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
+      import {DivIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       
-      const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); 
+      //const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
+      const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
 
       new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
       
@@ -21,8 +78,91 @@
       const stationsLayer = new LayerGroup();
 
       //Zwischenspeicher
-      const loadedCities = new Set();
       let citiesData = [];
+      const loadedCities = new Set();
+      const favoritesMap = new Map();
+      const stationMarkersMap = new Map();
+
+      //Eigene Icons definieren
+      const defaultIcon = new DivIcon({ 
+        className: 'custom-pin', 
+        html: `<div></div>`, 
+        iconSize: [18, 18], 
+        iconAnchor: [9, 9] }); 
+      
+      const favoriteIcon = new DivIcon({ 
+        className: 'custom-pin-fav', 
+        html: `<div></div>`, 
+        iconSize: [22, 22], 
+        iconAnchor: [11, 11] });
+
+      function renderFavoritesSidebar() { 
+        const listEl = document.getElementById('favoritesList'); 
+        listEl.innerHTML = ''; 
+        
+        if (favoritesMap.size === 0) { 
+          listEl.innerHTML = '<li>Noch keine Favoriten gespeichert.</li>'; 
+          return; 
+        } 
+        
+        favoritesMap.forEach((station, id) => { 
+          const li = document.createElement('li'); 
+          li.className = 'fav-item'; 
+          li.innerHTML = `<h4>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</h4> 
+          <p>${station.charging_type || ''} <br/>
+          ${station.post_code || 'Keine Adresse'}</p>`;
+
+          li.addEventListener('click', (e) => { 
+            // Falls der Entfernen-Button geklickt wurde: 
+            if (e.target.classList.contains('remove-btn')) { 
+              e.stopPropagation(); 
+              toggleFavorite(station, stationMarkersMap.get(id)); return; 
+            } 
+            // Zum Marker springen 
+            map.setView([station.lat, station.lon], 16); 
+            const marker = stationMarkersMap.get(id); 
+            if (marker) { marker.openPopup(); } 
+          });
+
+          listEl.appendChild(li); 
+        }); 
+      }
+
+      function toggleFavorite(station, marker) { 
+        const stationId = station.station_id || `${station.lat}_${station.lon}`; 
+        if (favoritesMap.has(stationId)) { 
+          // Entfernen 
+          favoritesMap.delete(stationId); 
+
+          if (marker) marker.setIcon(defaultIcon); 
+
+        } else { 
+          // Hinzufügen 
+          favoritesMap.set(stationId, station); 
+          if (marker) marker.setIcon(favoriteIcon); 
+        }
+        
+        // Sidebar aktualisieren 
+        renderFavoritesSidebar(); 
+
+        // Popup-Inhalt aktualisieren 
+        if (marker) { updatePopupContent(marker, station); } 
+      }
+ 
+      function updatePopupContent(marker, station) { 
+        const stationId = station.station_id || `${station.lat}_${station.lon}`; 
+        const isFav = favoritesMap.has(stationId); 
+        const popupHtml = `<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br /> 
+        ${station.charging_type || ''}`; 
+        marker.bindPopup(popupHtml);
+
+        // Event für den Button im Popup registrieren 
+        marker.on('popupopen', () => { 
+          const btn = document.getElementById(`btn-fav-${stationId.replace(/[^a-zA-Z0-9]/g, '')}`); 
+
+          if (btn) { btn.onclick = () => toggleFavorite(station, marker); } 
+        }); 
+      }
 
       //Städtemarker (Zoomstufe 6-8)
       async function loadCityMarkers() { 
@@ -34,8 +174,7 @@
 
           citiesData.forEach(city => {  
             if (city.geo) { 
-              const { lat, lon } = city.geo; 
-              const cityMarker = new Marker([lat, lon]); 
+              const cityMarker = new Marker([city.geo.lat, city.geo.lon]); 
 
               cityMarker.bindPopup(
                 `<b>${city.name_de}</b><br />
@@ -46,7 +185,7 @@
               cityMarker.on('pointerout', function () { this.closePopup(); });
 
               cityMarker.on('click', () => { 
-                map.setView([lat, lon], 10); 
+                map.setView([city.geo.lat, city.geo.lon], 11); 
               });
               
               cityLayer.addLayer(cityMarker); 
@@ -64,25 +203,35 @@
 
         try { 
           const responseCharging = await fetch(`https://infranode.dev/api/v1/cities/${citySlug}/charging`);
-         
+
           const responseDataCharging = await responseCharging.json(); 
           const chargingStations = responseDataCharging.data.payload.stations || []; 
+
+          console.log(chargingStations);
           
           chargingStations.forEach(station => { 
-            if (station.lat && station.lon) { 
+            if (!station.lat || !station.lon) return; 
 
-              //Ladesäulenmarker
-              const stationMarker = new Marker([station.lat, station.lon]); 
+            //Ladesäulenmarker
+            const stationId = station.station_id || `${station.lat}_${station.lon}`; 
+            const isFav = favoritesMap.has(stationId);
+
+            const stationMarker = new Marker([station.lat, station.lon], {icon: isFav ? favoriteIcon : defaultIcon}); 
             
-              stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
+            stationMarkersMap.set(stationId, stationMarker);
+            updatePopupContent(stationMarker, station);
 
-              stationMarker.on('pointerover', function () { this.openPopup(); }); 
+            stationMarker.on('click', () => { 
+              toggleFavorite(station, stationMarker);
+            });
+
+            /* stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
+
+            stationMarker.on('pointerover', function () { this.openPopup(); }); 
               
-              stationMarker.on('pointerout', function () { this.closePopup(); });
+            stationMarker.on('pointerout', function () { this.closePopup(); }); */
               
-              // Zur Detail-Ebene hinzufügen stationsLayer.
-              stationsLayer.addLayer(stationMarker);  
-            }
+            stationsLayer.addLayer(stationMarker);  
           });
         } catch (err) { 
           console.error(`Fehler beim Laden der Säulen für ${citySlug}:`, err); 
@@ -95,7 +244,8 @@
 
         if (currentZoom <= 8) { 
           // Bei Zoom 6-8: Nur Städte-Cluster anzeigen 
-          if (!map.hasLayer(cityLayer)) map.addLayer(cityLayer); if (map.hasLayer(stationsLayer)) map.removeLayer(stationsLayer); 
+          if (!map.hasLayer(cityLayer)) map.addLayer(cityLayer); 
+          if (map.hasLayer(stationsLayer)) map.removeLayer(stationsLayer); 
         } else { 
           // Bei Zoom > 8: Einzelne Ladesäulen anzeigen 
           if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer); 
