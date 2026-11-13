@@ -4,16 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LadeSpot.de - Startseite</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        html, body { height: 100%; margin: 0; }
-        body { display: flex; flex-direction: column; }
-        .container { flex: 1; }
-        footer { background-color: #f8f9fa; padding: 20px; text-align: center; }
-        .content { display: none; }
-        .content.active { display: block; }
-    </style>
+    <!-- Eigenes CSS -->
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -139,11 +131,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS und Abhängigkeiten -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     <script>
         function showContent(id) {
             document.querySelectorAll('.content').forEach(function(element) {
@@ -163,6 +150,36 @@
                     listItems[i].style.display = "none";
                 }
             }
+        });
+
+        // Ersatz für Bootstrap Collapse (Navigation)
+        document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const target = document.querySelector(this.getAttribute('data-target'));
+                if (target) target.classList.toggle('show');
+            });
+        });
+
+        // Ersatz für Bootstrap Modals
+        document.querySelectorAll('[data-toggle="modal"]').forEach(function(trigger) {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                const modal = document.querySelector(this.getAttribute('data-target'));
+                if (modal) {
+                    modal.style.display = 'block';
+                    setTimeout(() => modal.classList.add('show'), 10);
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-dismiss="modal"]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.style.display = 'none', 150);
+                }
+            });
         });
     </script>
 </body>
