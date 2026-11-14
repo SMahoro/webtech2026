@@ -13,7 +13,8 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
     const stationsLayer = new LayerGroup();
       
     //Favoritenspeicher
-    const favoritesSet = new Set();
+    const favoritesMap = new Map();
+    const stationMarkersMap = new Map();
 
     //Icons
     const defaultIcon = new DefaultIcon(); //normal
@@ -22,8 +23,32 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
     //Zwischenspeicher für bereits abgefragte Daten (dieselben Informationen werden so nicht mehrfach abgerufen)
     const loadedCities = new Set();
     let citiesData = [];
-    
-  //Städtemarker anzeigen(Zoomstufe 6-10)
+
+    //Favoritenliste
+    function renderSidebar() { 
+      const listEl = document.getElementById('favoritesList'); 
+      if (!listEl) return; 
+      listEl.innerHTML = ''; 
+      // Hinweis anzeigen, wenn keine Favoriten vorhanden sind 
+      if (favoritesMap.size === 0) { 
+        listEl.innerHTML = '<li>Noch keine Favoriten gespeichert.</li>'; return; 
+      } 
+      favoritesMap.forEach((station, stationId) => { 
+        const li = document.createElement('li'); 
+        li.className = 'fav-item'; 
+        li.innerHTML = ` <b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br /> ${station.charging_type || ''}, ${station.post_code || ''} `; 
+        // Interaktion: Klick auf Listenelement zentriert die Karte auf die Säule & öffnet das Popup 
+        li.addEventListener('click', () =>{ if (station.lat && station.lon) { 
+          map.setView([station.lat, station.lon], 16); 
+          const marker = stationMarkersMap.get(stationId); 
+          if (marker) { marker.openPopup(); } 
+          } 
+        }); 
+        listEl.appendChild(li); 
+      }); 
+    }
+
+    //Städtemarker anzeigen(Zoomstufe 6-10)
     async function loadCityMarkers() { 
       console.log("loadCityMarkers() called")
       try { 
@@ -69,10 +94,12 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
         chargingStations.forEach(station => { 
           if (station.lat || station.lon) { 
             const stationId = station.station_id;
-            const isFav = favoritesSet.has(stationId); //Fragt ab ob die Säule Favorit ist
+            const isFav = favoritesMap.has(stationId); //Fragt ab ob die Säule Favorit ist
               
             //Ladesäulenmarker
             const stationMarker = new Marker([station.lat, station.lon], { icon: isFav ? favoriteIcon : defaultIcon }); //blau oder rot abhängig vom Favoritenstatus
+
+            stationMarkersMap.set(stationId, stationMarker);
 
             stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
 
@@ -80,15 +107,17 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
             stationMarker.on('pointerout', function () { this.closePopup(); });
                 
             stationMarker.on('click', () => { 
-              if (favoritesSet.has(stationId)) { //war schon Favorit -> nicht mehr Favorit
-                favoritesSet.delete(stationId); 
+              if (favoritesMap.has(stationId)) { //war schon Favorit -> nicht mehr Favorit
+                favoritesMap.delete(stationId); 
                 stationMarker.setIcon(defaultIcon); 
                 console.log(`Aus Favoriten entfernt: ${stationId}`);
               } else { // war kein Favorit -> Favorit
-                favoritesSet.add(stationId); 
+                favoritesMap.set(stationId, station); 
                 stationMarker.setIcon(favoriteIcon); 
                 console.log(`Als Favorit gespeichert: ${stationId}`); 
               }
+
+              renderSidebar();
             });
 
             stationsLayer.addLayer(stationMarker); 
