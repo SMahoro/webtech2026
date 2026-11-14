@@ -6,6 +6,13 @@
     <title>LadeSpot.de - Startseite</title>
     <!-- Eigenes CSS -->
     <link href="styles.css" rel="stylesheet">
+    <!-- Die nachfolgenden vier Imports aktivieren, damit die Map dargestellt werden kann -->
+    <!--
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.css">
+    <link rel="stylesheet" href="map.css">
+    <script type="importmap">{"imports": {"leaflet": "https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.js"}}</script>
+    <script type="module" src="map.js"></script>
+    -->
 </head>
 <body>
     <!-- Navigation -->
@@ -33,6 +40,10 @@
     <div id="startseite" class="container content active">
         <h1>LadeSpot.de</h1>
         <p>Willkommen bei LadeSpot.de! Finden Sie Ihre nächste Ladestation:</p>
+        <!-- hier runter dann die map -->
+
+
+        <!-- der part kann raus -->
         <!-- Suchleiste -->
         <input type="text" id="searchBar" class="form-control" placeholder="Nach Standort suchen...">
         <!-- Ladestationen Liste -->
@@ -41,6 +52,8 @@
             <a href="#" class="list-group-item list-group-item-action">Station B</a>
             <a href="#" class="list-group-item list-group-item-action">Station C</a>
         </div>
+
+        <!-- vllt noch einen Absatz einfügen: Loggen sie sich ein, um ihre Favoriten zu sehen-->
     </div>
 
     <!-- Login/Register Inhalt -->
