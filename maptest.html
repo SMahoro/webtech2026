@@ -76,6 +76,34 @@
       //Layers
       const cityLayer = new LayerGroup().addTo(map);
       const stationsLayer = new LayerGroup();
+      const favoritesSet = new Set();
+
+      //Icons
+      const defaultIcon = new DivIcon({ 
+        className: 'custom-pin-default', 
+        html: `<div style=" 
+            background-color: #3498db; 
+            width: 18px; 
+            height: 18px; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+          "></div>`, 
+        iconSize: [18, 18], 
+        iconAnchor: [9, 9]});
+
+      const favoriteIcon = new DivIcon({ 
+        className: 'custom-pin-fav', 
+        html: `<div style="
+            background-color: #e74c3c; 
+            width: 24px; 
+            height: 24px; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            box-shadow: 0 2px 6px rgba(231,76,60,0.6); 
+          "></div>`, 
+        iconSize: [24, 24], 
+        iconAnchor: [12, 12]});
 
       //Zwischenspeicher
       const loadedCities = new Set();
@@ -117,7 +145,7 @@
       
       //Ladesäulenmarker (Zoomstufe > 10)
       async function loadCityStations(citySlug) { 
-        console.log(citySlug, loadedCities);
+        console.log("loadCityStations called", citySlug, loadedCities);
         if (loadedCities.has(citySlug)) return;
         loadedCities.add(citySlug);
 
@@ -127,21 +155,34 @@
           const responseDataCharging = await responseCharging.json(); 
           const chargingStations = responseDataCharging.data.payload.stations; 
 
-          console.log(citySlug, chargingStations);
+          console.log("stations try loop entered", chargingStations.station_id, chargingStations);
           
           chargingStations.forEach(station => { 
             if (station.lat || station.lon) { 
+              const stationId = station.station_id;
+              const isFav = favoritesSet.has(stationId);
+              //Ladesäulenmarker
+              const stationMarker = new Marker([station.lat, station.lon], { icon: isFav ? favoriteIcon : defaultIcon }); 
 
-            //Ladesäulenmarker
-            const stationMarker = new Marker([station.lat, station.lon]); 
+              stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
 
-            stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
+              stationMarker.on('pointerover', function () { this.openPopup(); }); 
+                
+              stationMarker.on('pointerout', function () { this.closePopup(); });
+                
+              stationMarker.on('click', () => { if (favoritesSet.has(stationId)) { // WAR SCHON FAVORIT -&gt; Wieder blau machen und entfernen 
+                favoritesSet.delete(stationId); 
+                stationMarker.setIcon(defaultIcon); 
+                console.log(`Entfernt: ${stationId}`);
+              } else { // WAR KEIN FAVORIT -&gt; Rot &amp; größer machen und speichern 
+                favoritesSet.add(stationId); 
+                stationMarker.setIcon(favoriteIcon); 
+                console.log(`Gespeichert: ${stationId}`); 
+              } // Hier kannst du später auch deine Sidebar-Liste aktualisieren! 
+              });
 
-            stationMarker.on('pointerover', function () { this.openPopup(); }); 
-              
-            stationMarker.on('pointerout', function () { this.closePopup(); });
-              
-            stationsLayer.addLayer(stationMarker); }
+              stationsLayer.addLayer(stationMarker); 
+            }
           });
         } catch (err) { 
           console.error(`Fehler beim Laden der Säulen für ${citySlug}:`, err); 
