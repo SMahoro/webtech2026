@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LadeSpot.de - Startseite</title>
-    <!-- Eigenes CSS -->
     <link href="styles.css" rel="stylesheet">
-    <!-- Die nachfolgenden vier Imports aktivieren, damit die Map dargestellt werden kann -->
-    <!--
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.css">
     <link rel="stylesheet" href="map.css">
     <script type="importmap">{"imports": {"leaflet": "https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.js"}}</script>
     <script type="module" src="map.js"></script>
-    -->
+    
 </head>
 <body>
     <!-- Navigation -->
@@ -27,10 +24,10 @@
                     <a class="nav-link" href="#" onclick="showContent('startseite')">Startseite</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showContent('login')">Login/Registration</a>
+                    <a class="nav-link" href="login.html">Login/Registration</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showContent('kontakt')">Kontakt</a>
+                    <a class="nav-link" href="contact.html" ">Kontakt</a>
                 </li>
             </ul>
         </div>
@@ -41,57 +38,18 @@
         <h1>LadeSpot.de</h1>
         <p>Willkommen bei LadeSpot.de! Finden Sie Ihre nächste Ladestation:</p>
         <!-- hier runter dann die map -->
+        <div id="mapContents"> <!-- Wrapper Container für die Karte und die SideBar -->
+            <div id="map"></div>
 
-
-        <!-- der part kann raus -->
-        <!-- Suchleiste -->
-        <input type="text" id="searchBar" class="form-control" placeholder="Nach Standort suchen...">
-        <!-- Ladestationen Liste -->
-        <div class="list-group mt-3" id="stationList">
-            <a href="#" class="list-group-item list-group-item-action">Station A</a>
-            <a href="#" class="list-group-item list-group-item-action">Station B</a>
-            <a href="#" class="list-group-item list-group-item-action">Station C</a>
-        </div>
-
-        <!-- vllt noch einen Absatz einfügen: Loggen sie sich ein, um ihre Favoriten zu sehen-->
+            <aside id="favorites"> 
+            <h2>Meine Favoriten</h2> 
+        <ul> 
+          <li>Noch keine Favoriten gespeichert.</li> 
+        </ul> 
+      </aside>
     </div>
 
-    <!-- Login/Register Inhalt -->
-    <div id="login" class="container content">
-        <h1>Login oder Registrierung</h1>
-        <form>
-            <div class="form-group">
-                <label for="email">E-Mail-Adresse:</label>
-                <input type="email" class="form-control" id="email" placeholder="E-Mail eingeben">
-            </div>
-            <div class="form-group">
-                <label for="password">Passwort:</label>
-                <input type="password" class="form-control" id="password" placeholder="Passwort eingeben">
-            </div>
-            <button type="submit" class="btn btn-primary">Einloggen</button>
-            <a href="#" class="btn btn-secondary">Registrieren</a>
-        </form>
-    </div>
-
-    <!-- Kontakt Inhalt -->
-    <div id="kontakt" class="container content">
-        <h1>Kontakt</h1>
-        <p>Haben Sie Fragen? Kontaktieren Sie uns!</p>
-        <form>
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" id="name" placeholder="Name eingeben">
-            </div>
-            <div class="form-group">
-                <label for="email">E-Mail-Adresse:</label>
-                <input type="email" class="form-control" id="email" placeholder="E-Mail eingeben">
-            </div>
-            <div class="form-group">
-                <label for="message">Nachricht:</label>
-                <textarea class="form-control" id="message" rows="4" placeholder="Ihre Nachricht"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Nachricht senden</button>
-        </form>
+    <h3>Legen Sie ein Konto bei uns an und speichern sich ihre Favoriten ab.</h3>
     </div>
 
     <!-- Footer -->
