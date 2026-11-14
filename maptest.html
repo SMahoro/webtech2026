@@ -2,200 +2,24 @@
 <html>
   <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.css">
-    <style>
-      #main { 
-        display: flex; 
-        height: 95vh;
-        margin-top: 4vh;
-        gap: 15px; 
-        font-family: sans-serif; } 
-
-      #map { 
-        flex: 3; 
-        height: 100%; 
-        border-radius: 8px; } 
-
-      aside { 
-        flex: 1;  
-        background: #f8f9fa; 
-        padding: 15px; 
-        border-radius: 8px; 
-        overflow-y: auto; 
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1); } 
-
-      /*.fav-list { 
-        list-style: none; 
-        padding: 0; margin: 0; } 
-      
-      .fav-item { 
-        background: white; 
-        padding: 10px;
-         margin-bottom: 8px; 
-         border-radius: 6px; 
-         border-left: 4px solid #e74c3c; 
-         cursor: pointer; 
-         transition: transform 0.15s ease, box-shadow 0.15s ease; } 
-         
-      .fav-item:hover { 
-        transform: translateY(-2px); 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); } 
-        
-      .fav-item h4 { 
-        margin: 0 0 5px 0; 
-        font-size: 14px; } 
-        
-      .fav-item p { 
-        margin: 0; 
-        font-size: 12px; 
-        color: #666; }*/
-    </style>
+    <link rel="stylesheet" href="map.css">
 	  <script type="importmap">
 		  {"imports": {"leaflet": "https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.js"}}
 	  </script>
+    <script type="module" src="map.js"></script>
   </head>
   <body>
-    <div id="main">
+    <!-- Ab hier kopieren -->
+    <div id="mapContents"> <!-- Wrapper Container für die Karte und die SideBar -->
       <div id="map"></div>
 
-      <aside> 
+      <aside id="favorites"> 
         <h2>Meine Favoriten</h2> 
         <ul> 
           <li>Noch keine Favoriten gespeichert.</li> 
         </ul> 
       </aside>
     </div>
-
-    <script type="module">
-      import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
-      
-      //const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
-      const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
-
-      new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
-      
-      //Layers
-      const cityLayer = new LayerGroup().addTo(map);
-      const stationsLayer = new LayerGroup();
-      const favoritesSet = new Set();
-
-      //Icons
-      const defaultIcon = new DefaultIcon();
-      const favoriteIcon = new DefaultIcon({color: 'crimson'});
-
-      //Zwischenspeicher
-      const loadedCities = new Set();
-      let citiesData = [];
-    
-      //Städtemarker (Zoomstufe 6-10)
-      async function loadCityMarkers() { 
-        console.log("loadCityMarkers() called")
-        try { 
-          const responseCities = await fetch('https://infranode.dev/api/v1/cities'); 
-
-          const responseDataCities = await responseCities.json(); 
-          citiesData = responseDataCities.data;  
-          console.log(citiesData);            
-
-          citiesData.forEach(city => {  
-            if (city.geo) { 
-              const cityMarker = new Marker([city.geo.lat, city.geo.lon]); 
-
-              cityMarker.bindPopup(
-                `<b>${city.name_de}</b><br />
-                Klicke zum Heranzoomen`);
-
-              cityMarker.on('pointerover', function () { this.openPopup(); }); 
-              
-              cityMarker.on('pointerout', function () { this.closePopup(); });
-
-              cityMarker.on('click', () => { 
-                map.setView([city.geo.lat, city.geo.lon], 12); 
-              });
-              
-              cityLayer.addLayer(cityMarker); 
-            } 
-          }); 
-        } catch (error) {
-          console.error('Fehler beim Laden der Städte-Marker:', error); 
-        }
-      } 
-      
-      //Ladesäulenmarker (Zoomstufe > 10)
-      async function loadCityStations(citySlug) { 
-        console.log("loadCityStations called", citySlug, loadedCities);
-        if (loadedCities.has(citySlug)) return;
-        loadedCities.add(citySlug);
-
-        try { 
-          const responseCharging = await fetch(`https://infranode.dev/api/v1/cities/${citySlug}/charging`);
-
-          const responseDataCharging = await responseCharging.json(); 
-          const chargingStations = responseDataCharging.data.payload.stations; 
-
-          console.log("stations try loop entered", chargingStations.station_id, chargingStations);
-          
-          chargingStations.forEach(station => { 
-            if (station.lat || station.lon) { 
-              const stationId = station.station_id;
-              const isFav = favoritesSet.has(stationId);
-              //Ladesäulenmarker
-              const stationMarker = new Marker([station.lat, station.lon], { icon: isFav ? favoriteIcon : defaultIcon }); 
-
-              stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
-
-              stationMarker.on('pointerover', function () { this.openPopup(); }); 
-                
-              stationMarker.on('pointerout', function () { this.closePopup(); });
-                
-              stationMarker.on('click', () => { if (favoritesSet.has(stationId)) { // WAR SCHON FAVORIT -&gt; Wieder blau machen und entfernen 
-                favoritesSet.delete(stationId); 
-                stationMarker.setIcon(defaultIcon); 
-                console.log(`Entfernt: ${stationId}`);
-              } else { // WAR KEIN FAVORIT -&gt; Rot &amp; größer machen und speichern 
-                favoritesSet.add(stationId); 
-                stationMarker.setIcon(favoriteIcon); 
-                console.log(`Gespeichert: ${stationId}`); 
-              } // Hier kannst du später auch deine Sidebar-Liste aktualisieren! 
-              });
-
-              stationsLayer.addLayer(stationMarker); 
-            }
-          });
-        } catch (err) { 
-          console.error(`Fehler beim Laden der Säulen für ${citySlug}:`, err); 
-        } 
-      }
-
-      //delay für weniger heftige API-Calls
-      function debounce(func, delay) { 
-        let timeoutId; 
-        return function (...args) { 
-          clearTimeout(timeoutId); 
-          timeoutId = setTimeout(() => func.apply(this, args), delay); 
-        }; 
-      }
-
-      map.on('moveend', debounce(() => { 
-        const currentZoom = map.getZoom(); 
-        const bounds = map.getBounds(); 
-        
-        if (currentZoom <= 10) { 
-          if (!map.hasLayer(cityLayer)) map.addLayer(cityLayer); 
-          if (map.hasLayer(stationsLayer)) map.removeLayer(stationsLayer); 
-        } else { 
-          if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer); 
-          if (!map.hasLayer(stationsLayer)) map.addLayer(stationsLayer);
-          
-          citiesData.forEach(city => { 
-            // Sichere Prüfung gegen Undefined-Fehler: 
-            if (city?.geo?.lat && city?.geo?.lon) { 
-              if (bounds.contains([city.geo.lat, city.geo.lon])) { loadCityStations(city.slug); } 
-            } 
-          }); 
-        } 
-      }, 300));
-
-      loadCityMarkers();
-	  </script>
+    <!-- Bis hier -->
   </body>
 </html>
