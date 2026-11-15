@@ -148,6 +148,7 @@ a.text-dark:hover, a.text-dark:focus { color: #121416 !important; }
     margin-top: 0;
     margin-bottom: 0;
     list-style: none;
+    width: 100%;
 }
 
 .nav-link {
@@ -441,4 +442,8 @@ textarea.form-control {
 
 span#login-error-box {
     color: red;
+}
+
+.logout-form {
+    margin-left: auto;
 }
