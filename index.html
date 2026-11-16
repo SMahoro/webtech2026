@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.css">
     <link rel="stylesheet" href="map.css">
     <script type="importmap">{"imports": {"leaflet": "https://cdn.jsdelivr.net/npm/leaflet@2.0.0-beta.2/dist/leaflet.js"}}</script>
+    <script src="testLogin.js"></script>
     <script type="module" src="map.js"></script>
-    
 </head>
 <body>
     <!-- Navigation -->
@@ -43,13 +43,13 @@
 
             <aside id="favorites"> 
             <h2>Meine Favoriten</h2> 
-        <ul> 
-          <li>Noch keine Favoriten gespeichert.</li> 
-        </ul> 
-      </aside>
-    </div>
+            <ul> 
+            <li>Noch keine Favoriten gespeichert.</li> 
+            </ul> 
+        </aside>
+        </div>
 
-    <h3>Legen Sie ein Konto bei uns an und speichern sich ihre Favoriten ab.</h3>
+        <h3>Legen Sie ein Konto bei uns an und speichern sich ihre Favoriten ab.</h3>
     </div>
 
     <!-- Footer -->
@@ -110,7 +110,7 @@
             document.getElementById(id).classList.add('active');
         }
 
-        document.getElementById('searchBar').addEventListener('input', function() {
+        /*document.getElementById('searchBar').addEventListener('input', function() {
             let filter = this.value.toUpperCase();
             let listItems = document.getElementById("stationList").getElementsByTagName('a');
             for (let i = 0; i < listItems.length; i++) {
@@ -121,7 +121,7 @@
                     listItems[i].style.display = "none";
                 }
             }
-        });
+        });*/
 
         // Ersatz für Bootstrap Collapse (Navigation)
         document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {

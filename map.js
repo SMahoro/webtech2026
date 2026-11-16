@@ -2,10 +2,11 @@
 
 //nötige Imports
 import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
-  //Fragt ab, ob der Nutzer angemeldet ist:
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
   
-  if (isLoggedIn) {
+  //Fragt ab, ob der Nutzer angemeldet ist:
+  //alert(Auth.isLoggedIn());
+
+  if (Auth.isLoggedIn()) {
     console.log("User ist eingeloggt, Favoriten können gespeichert werden.");
     // Hier deinen Karten-Code ausführen
   } else {
