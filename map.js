@@ -3,18 +3,16 @@
 //nötige Imports
 import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
   
-  //Fragt ab, ob der Nutzer angemeldet ist:
-    //alert(Auth.isLoggedIn());
+  //Login-Abfrage
+    alert(Auth.isLoggedIn());
 
     if (Auth.isLoggedIn()) {
       console.log("User ist eingeloggt, Favoriten können gespeichert werden.");
-      // Hier deinen Karten-Code ausführen
     } else {
       console.log("Nicht eingeloggt! Speicher von Favoriten nicht möglich.");
-      //window.location.href = 'login.html';
     }
 
-  //Initialisiert die Map
+  //Map-Initialisierung
     //const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
     const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
     new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
@@ -25,11 +23,22 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
     const defaultIcon = new DefaultIcon(); //normal
     const favoriteIcon = new DefaultIcon({color: 'crimson'}); //Favoriten
       
-    //Arbeitsspeicher
+  //Arbeitsspeicher
     let citiesData = [];
 
     const loadedCities = new Set();
-    const favoritesMap = new Map();
+
+    function loadFavoritesFromSession() {
+      const saved = sessionStorage.getItem('favoritesMap');
+      return saved ? new Map(JSON.parse(saved)) : new Map();
+    }
+
+    function saveFavoritesToSession() {
+      const mapAsArray = Array.from(favoritesMap.entries());
+      sessionStorage.setItem('favoritesMap', JSON.stringify(mapAsArray));
+    }
+
+    const favoritesMap = loadFavoritesFromSession();
     const stationMarkersMap = new Map();
 
   //Städte laden
@@ -102,10 +111,73 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       }
     }   
 
+  //Ladesäulenmarker (Zoomstufe > 10)
+    async function loadCityStations(citySlug) { 
+      console.log("loadCityStations called", citySlug, loadedCities);
 
-    //Favoritenliste
+      if (loadedCities.has(citySlug)) return;
+      
+      loadedCities.add(citySlug);
+
+      try { 
+        const responseCharging = await fetch(`https://infranode.dev/api/v1/cities/${citySlug}/charging`);
+
+        if (!responseCharging.ok) {
+          throw new Error(`HTTP-Fehler! Status: ${responseCharging.status}`);
+        }
+
+        const responseDataCharging = await responseCharging.json(); 
+        const chargingStations = responseDataCharging.data.payload.stations; 
+
+        console.log("Stations try-loop entered");
+          
+        chargingStations.forEach(station => { 
+          if (station.lat && station.lon) { 
+            const stationId = station.station_id;
+            const isFav = favoritesMap.has(stationId); //Favorit?
+
+            //Ladesäulenmarker
+            const stationMarker = new Marker([station.lat, station.lon], { icon: isFav ? favoriteIcon : defaultIcon });
+
+            stationMarkersMap.set(stationId, stationMarker);
+
+            stationMarker.bindTooltip(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
+
+            stationMarker.on('pointerover', function () { this.openTooltip(); });  
+            stationMarker.on('pointerout', function () { this.closeTooltip(); });
+                
+            stationMarker.on('click', () => { 
+              if(Auth.isLoggedIn()){
+                if (favoritesMap.has(stationId)) { //war schon Favorit -> nicht mehr Favorit
+                  favoritesMap.delete(stationId); 
+                  stationMarker.setIcon(defaultIcon); 
+                  console.log(`Aus Favoriten entfernt: ${stationId}`);
+                } else { // war kein Favorit -> Favorit
+                  favoritesMap.set(stationId, station); 
+                  stationMarker.setIcon(favoriteIcon); 
+                  console.log(`Als Favorit gespeichert: ${stationId}`); 
+                }
+
+                saveFavoritesToSession()
+                renderSidebar();
+              } else {
+                stationMarker.bindPopup('Melde Dich an, um Favoriten zu speichern: <a href="login.html">Zum Login</a>');
+              }
+
+              
+            });
+
+            stationsLayer.addLayer(stationMarker); 
+          }
+        });
+      } catch (err) { 
+        console.error(`Fehler beim Laden der Säulen für ${citySlug}:`, err); 
+      } 
+    }
+
+  //Favoriten-SideBar
     function renderSidebar() { 
-      const listEl = document.getElementById('favoritesList'); 
+      const listElements = document.getElementById('favoritesList'); 
       if (!listEl) return; 
       listEl.innerHTML = ''; 
       // Hinweis anzeigen, wenn keine Favoriten vorhanden sind 
@@ -129,56 +201,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
 
     
       
-    //Ladesäulenmarker (Zoomstufe > 10)
-    async function loadCityStations(citySlug) { 
-      console.log("loadCityStations called", citySlug, loadedCities);
-      if (loadedCities.has(citySlug)) return;
-      
-      loadedCities.add(citySlug);
-
-      try { 
-        const responseCharging = await fetch(`https://infranode.dev/api/v1/cities/${citySlug}/charging`);
-        const responseDataCharging = await responseCharging.json(); 
-        const chargingStations = responseDataCharging.data.payload.stations; 
-
-        console.log("stations try loop entered", chargingStations.station_id, chargingStations);
-          
-        chargingStations.forEach(station => { 
-          if (station.lat || station.lon) { 
-            const stationId = station.station_id;
-            const isFav = favoritesMap.has(stationId); //Fragt ab ob die Säule Favorit ist
-              
-            //Ladesäulenmarker
-            const stationMarker = new Marker([station.lat, station.lon], { icon: isFav ? favoriteIcon : defaultIcon }); //blau oder rot abhängig vom Favoritenstatus
-
-            stationMarkersMap.set(stationId, stationMarker);
-
-            stationMarker.bindPopup(`<b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br />${station.charging_type || ''}`); 
-
-            stationMarker.on('pointerover', function () { this.openPopup(); });  
-            stationMarker.on('pointerout', function () { this.closePopup(); });
-                
-            stationMarker.on('click', () => { 
-              if (favoritesMap.has(stationId)) { //war schon Favorit -> nicht mehr Favorit
-                favoritesMap.delete(stationId); 
-                stationMarker.setIcon(defaultIcon); 
-                console.log(`Aus Favoriten entfernt: ${stationId}`);
-              } else { // war kein Favorit -> Favorit
-                favoritesMap.set(stationId, station); 
-                stationMarker.setIcon(favoriteIcon); 
-                console.log(`Als Favorit gespeichert: ${stationId}`); 
-              }
-
-              renderSidebar();
-            });
-
-            stationsLayer.addLayer(stationMarker); 
-          }
-        });
-      } catch (err) { 
-        console.error(`Fehler beim Laden der Säulen für ${citySlug}:`, err); 
-      } 
-    }
+    
 
     //delay für weniger heftige API-Calls
     function debounce(func, delay) { 
