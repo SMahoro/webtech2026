@@ -105,7 +105,7 @@
             document.getElementById(id).classList.add('active');
         }
 
-        document.getElementById('searchBar').addEventListener('input', function() {
+        /*document.getElementById('searchBar').addEventListener('input', function() {
             let filter = this.value.toUpperCase();
             let listItems = document.getElementById("stationList").getElementsByTagName('a');
             for (let i = 0; i < listItems.length; i++) {
@@ -116,7 +116,7 @@
                     listItems[i].style.display = "none";
                 }
             }
-        });
+        });*/
 
         // Ersatz für Bootstrap Collapse (Navigation)
         document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {

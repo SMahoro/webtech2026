@@ -4,36 +4,104 @@
 import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
   
   //Fragt ab, ob der Nutzer angemeldet ist:
-  //alert(Auth.isLoggedIn());
+    //alert(Auth.isLoggedIn());
 
-  if (Auth.isLoggedIn()) {
-    console.log("User ist eingeloggt, Favoriten können gespeichert werden.");
-    // Hier deinen Karten-Code ausführen
-  } else {
-    console.log("Nicht eingeloggt! Speicher von Favoriten nicht möglich.");
-    //window.location.href = 'login.html';
-  }
+    if (Auth.isLoggedIn()) {
+      console.log("User ist eingeloggt, Favoriten können gespeichert werden.");
+      // Hier deinen Karten-Code ausführen
+    } else {
+      console.log("Nicht eingeloggt! Speicher von Favoriten nicht möglich.");
+      //window.location.href = 'login.html';
+    }
 
   //Initialisiert die Map
     //const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
     const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
     new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
       
-    //Kartenebenen
     const cityLayer = new LayerGroup().addTo(map);
     const stationsLayer = new LayerGroup();
+  
+    const defaultIcon = new DefaultIcon(); //normal
+    const favoriteIcon = new DefaultIcon({color: 'crimson'}); //Favoriten
       
-    //Favoritenspeicher
+    //Arbeitsspeicher
+    let citiesData = [];
+
+    const loadedCities = new Set();
     const favoritesMap = new Map();
     const stationMarkersMap = new Map();
 
-    //Icons
-    const defaultIcon = new DefaultIcon(); //normal
-    const favoriteIcon = new DefaultIcon({color: 'crimson'}); //Favoriten
+  //Städte laden
+    async function getCitiesData() { 
+      if (Array.isArray(citiesData) && citiesData.length > 0) { return citiesData; } 
+      
+      try {
+        const cachedCities = sessionStorage.getItem('citiesData'); 
+        if (cachedCities) { 
+          const parsed = JSON.parse(cachedCities);
+          if (Array.isArray(parsed)) {
+            citiesData = parsed;
+            console.log('Städte aus sessionStorage geladen'); 
+            return citiesData;
+          }
+        }
+      } catch (e) { 
+        console.error('Fehler beim Lesen aus sessionStorage:', e); 
+      }  
+      
+      try { 
+        const response = await fetch('https://infranode.dev/api/v1/cities'); 
 
-    //Zwischenspeicher für bereits abgefragte Daten (dieselben Informationen werden so nicht mehrfach abgerufen)
-    const loadedCities = new Set();
-    let citiesData = [];
+        if (!response.ok) {
+          throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+        }
+
+        const responseData = await response.json(); 
+        citiesData = Array.isArray(responseData?.data) ? responseData.data : [];
+
+        if (citiesData.length > 0) {
+          try {
+            sessionStorage.setItem('citiesData', JSON.stringify(citiesData));
+            console.log('Städte frisch von der API geladen und im sessionStorage gespeichert'); 
+          } catch (storageError) {
+            console.warn('Konnte nicht im sessionStorage speichern:', storageError);
+          }
+        }
+      } catch (error) { 
+        console.error('Fehler beim Laden der Städte-Daten:', error); 
+        citiesData = [];
+      }
+      return citiesData; 
+    }
+
+  //Städtemarker anzeigen(Zoomstufe 6-10)
+    async function loadCityMarkers() { 
+      console.log("loadCityMarkers() called")
+      
+      try { 
+        const cities = await getCitiesData();
+
+        cities.forEach(city => {  
+          if (city.geo && city.geo.lat && city.geo.lon) { 
+            const cityMarker = new Marker([city.geo.lat, city.geo.lon]); 
+            cityMarker.bindPopup(`<b>${city.name_de}</b><br />Klicke zum Heranzoomen`);
+
+            cityMarker.on('pointerover', function () { this.openPopup(); });
+            cityMarker.on('pointerout', function () { this.closePopup(); });
+
+            cityMarker.on('click', () => { 
+              map.setView([city.geo.lat, city.geo.lon], 12); 
+            });
+              
+            cityLayer.addLayer(cityMarker); 
+          } 
+        }); 
+      } catch (error) {
+        console.error('Fehler beim Laden der Städte-Marker:', error); 
+      }
+    }   
+
 
     //Favoritenliste
     function renderSidebar() { 
@@ -59,34 +127,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       }); 
     }
 
-    //Städtemarker anzeigen(Zoomstufe 6-10)
-    async function loadCityMarkers() { 
-      console.log("loadCityMarkers() called")
-      try { 
-        const responseCities = await fetch('https://infranode.dev/api/v1/cities'); 
-        const responseDataCities = await responseCities.json(); 
-        citiesData = responseDataCities.data;  
-        console.log(citiesData);            
-
-        citiesData.forEach(city => {  
-          if (city.geo) { 
-            const cityMarker = new Marker([city.geo.lat, city.geo.lon]); 
-            cityMarker.bindPopup(`<b>${city.name_de}</b><br />Klicke zum Heranzoomen`);
-
-            cityMarker.on('pointerover', function () { this.openPopup(); });
-            cityMarker.on('pointerout', function () { this.closePopup(); });
-
-            cityMarker.on('click', () => { 
-              map.setView([city.geo.lat, city.geo.lon], 12); 
-            });
-              
-            cityLayer.addLayer(cityMarker); 
-          } 
-        }); 
-      } catch (error) {
-        console.error('Fehler beim Laden der Städte-Marker:', error); 
-      }
-    } 
+    
       
     //Ladesäulenmarker (Zoomstufe > 10)
     async function loadCityStations(citySlug) { 

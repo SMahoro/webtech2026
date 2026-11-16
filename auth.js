@@ -1,9 +1,9 @@
-// Initialisierung: Nur auf 'false' setzen, wenn noch gar kein Wert existiert!
+//Hilfsfunktionen Login
+
 if (sessionStorage.getItem('isLoggedIn') === null) {
     sessionStorage.setItem('isLoggedIn', 'false');
 }
 
-// Hilfsfunktionen, damit du nicht ständig mit Strings ('true'/'false') hantieren musst
 const Auth = {
     isLoggedIn() {
         return sessionStorage.getItem('isLoggedIn') === 'true';
@@ -13,10 +13,9 @@ const Auth = {
     },
     logout() {
         sessionStorage.setItem('isLoggedIn', 'false');
+        sessionStorage.removeItem('citiesData');
+        sessionStorage.removeItem('favoritesMap');
     }
 };
 
 Auth.isLoggedIn();
-
-//let isLoggedIn = true;
-//sessionStorage.setItem('isLoggedIn', 'true');
