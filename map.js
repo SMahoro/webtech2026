@@ -2,7 +2,17 @@
 
 //nötige Imports
 import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
-      
+  //Fragt ab, ob der Nutzer angemeldet ist:
+  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+  
+  if (isLoggedIn) {
+    console.log("User ist eingeloggt, Favoriten können gespeichert werden.");
+    // Hier deinen Karten-Code ausführen
+  } else {
+    console.log("Nicht eingeloggt! Speicher von Favoriten nicht möglich.");
+    //window.location.href = 'login.html';
+  }
+
   //Initialisiert die Map
     //const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
     const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
