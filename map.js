@@ -109,6 +109,10 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       } catch (error) {
         console.error('Fehler beim Laden der Städte-Marker:', error); 
       }
+
+      if(Auth.isLoggedIn()){
+        renderSidebar();
+      }
     }   
 
   //Ladesäulenmarker (Zoomstufe > 10)
@@ -177,12 +181,51 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
 
   //Favoriten-SideBar
     function renderSidebar() { 
-      const listElements = document.getElementById('favoritesList'); 
-      if (!listEl) return; 
-      listEl.innerHTML = ''; 
+      console.log("renderSidebar() called");
+      const mapContents = document.getElementById("mapContents"); 
+
+      if (!mapContents) return;
+
+      let aside = document.getElementById("favorites");
+      let ul;
+
+      if (!aside){
+        const loginAd = document.getElementById("loginAd");
+        loginAd.style.display = "none";
+
+        aside = document.createElement("aside");
+        aside.id = "favorites";
+        mapContents.appendChild(aside);
+
+        const heading = document.createElement("h4");
+        heading.textContent = "Meine Favoriten";
+        aside.appendChild(heading);
+
+        const ul = document.createElement("ul");
+        ul.id = "fav-list";
+        aside.appendChild(ul);
+      } else {
+        ul = aside.querySelector("ul");
+        if (ul) {
+            ul.innerHTML = "";
+        }
+      }
+        
+
+        /*if (favoritesMap.size === 0){
+          const li = document.createElement('li');
+          li.innerHTML = '<li class="fav-items">Noch keine Favoriten gespeichert.</li>';
+          ul.appendChild(li);
+          return;
+        }*/
+      
+    }
+
+      /*if (!listElements) return; 
+      listElements.innerHTML = ''; 
       // Hinweis anzeigen, wenn keine Favoriten vorhanden sind 
       if (favoritesMap.size === 0) { 
-        listEl.innerHTML = '<li>Noch keine Favoriten gespeichert.</li>'; return; 
+        listElements.innerHTML = '<li class="fav-items">Noch keine Favoriten gespeichert.</li>'; return; 
       } 
       favoritesMap.forEach((station, stationId) => { 
         const li = document.createElement('li'); 
@@ -195,9 +238,9 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
           if (marker) { marker.openPopup(); } 
           } 
         }); 
-        listEl.appendChild(li); 
-      }); 
-    }
+        listElements.appendChild(li); 
+      }); */
+    
 
     
       
