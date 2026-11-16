@@ -48,105 +48,17 @@
     </div>
 
     <!-- Footer -->
-    <footer>
-        <div class="container p-4">
-            <div class="text-center">
-                <a href="#" data-toggle="modal" data-target="#impressumModal" class="text-dark">Impressum</a> | 
-                <a href="#" data-toggle="modal" data-target="#datenschutzModal" class="text-dark">Datenschutz</a>
-            </div>
-        </div>
-    </footer>
 
-    <!-- Impressum Modal -->
-    <div class="modal fade" id="impressumModal" tabindex="-1" aria-labelledby="impressumLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="impressumLabel">Impressum</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Hier stehen die vollständigen Impressumsinformationen.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
-                </div>
-            </div>
+
+    <!-- Footer -->
+<footer>
+    <div class="container p-4">
+        <div class="text-center">
+            <a href="impressum.html" id="openImpressum" class="text-dark">Impressum</a> |
+            <a href="datenschutz.html" id="openDatenschutz" class="text-dark">Datenschutz</a>
         </div>
     </div>
+</footer>
 
-    <!-- Datenschutz Modal -->
-    <div class="modal fade" id="datenschutzModal" tabindex="-1" aria-labelledby="datenschutzLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="datenschutzLabel">Datenschutz</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Hier stehen die vollständigen Datenschutzinformationen.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function showContent(id) {
-            document.querySelectorAll('.content').forEach(function(element) {
-                element.classList.remove('active');
-            });
-            document.getElementById(id).classList.add('active');
-        }
-
-        document.getElementById('searchBar').addEventListener('input', function() {
-            let filter = this.value.toUpperCase();
-            let listItems = document.getElementById("stationList").getElementsByTagName('a');
-            for (let i = 0; i < listItems.length; i++) {
-                let txtValue = listItems[i].textContent || listItems[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    listItems[i].style.display = "";
-                } else {
-                    listItems[i].style.display = "none";
-                }
-            }
-        });
-
-        // Ersatz für Bootstrap Collapse (Navigation)
-        document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const target = document.querySelector(this.getAttribute('data-target'));
-                if (target) target.classList.toggle('show');
-            });
-        });
-
-        // Ersatz für Bootstrap Modals
-        document.querySelectorAll('[data-toggle="modal"]').forEach(function(trigger) {
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                const modal = document.querySelector(this.getAttribute('data-target'));
-                if (modal) {
-                    modal.style.display = 'block';
-                    setTimeout(() => modal.classList.add('show'), 10);
-                }
-            });
-        });
-
-        document.querySelectorAll('[data-dismiss="modal"]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const modal = this.closest('.modal');
-                if (modal) {
-                    modal.classList.remove('show');
-                    setTimeout(() => modal.style.display = 'none', 150);
-                }
-            });
-        });
-    </script>
 </body>
 </html>
