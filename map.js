@@ -13,8 +13,8 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
     }
 
   //Map-Initialisierung
-    //const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
-    const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
+    const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
+    //const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
     new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
       
     const cityLayer = new LayerGroup().addTo(map);
