@@ -10,17 +10,22 @@ const Auth = {
     isLoggedIn() {
         return sessionStorage.getItem('isLoggedIn') === 'true';
     },
-    login() {
+    login() { //zum Testen
         sessionStorage.setItem('isLoggedIn', 'true');
         alert('Du wurdest angemeldet.')
     },
-    logout() {
+    logout() { //zum Testen
         sessionStorage.setItem('isLoggedIn', 'false');
         sessionStorage.removeItem('citiesData');
         sessionStorage.removeItem('favoritesMap');
         alert('Du wurdest abgemeldet.')
+        location.reload();
     }
 };
 
+function logout(e) {
+    e.preventDefault();
+    Auth.logout();
+}
 //Auth.login();
 //Auth.logout();
