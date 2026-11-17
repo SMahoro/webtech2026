@@ -19,6 +19,7 @@ const Auth = {
         sessionStorage.removeItem('citiesData');
         sessionStorage.removeItem('favoritesMap');
         alert('Du wurdest abgemeldet.')
+        location.reload();
     }
 };
 

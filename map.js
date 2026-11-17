@@ -13,7 +13,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
     }
 
   //Map-Initialisierung
-    const map = new LeafletMap('map').setView([51.1657, 10.4515], 7); //Deutschland
+    const map = new LeafletMap('map').setView([51.1657, 10.4515], 6); //Deutschland
     //const map = new LeafletMap('map').setView([53.6288, 11.4148], 8); //Schwerin
     new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map); 
       
@@ -100,7 +100,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
             cityMarker.on('pointerout', function () { this.closePopup(); });
 
             cityMarker.on('click', () => { 
-              map.setView([city.geo.lat, city.geo.lon], 12); 
+              map.setView([city.geo.lat, city.geo.lon], 10); 
             });
               
             cityLayer.addLayer(cityMarker); 
@@ -115,7 +115,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       }
     }   
 
-  //Ladesäulenmarker (Zoomstufe > 10)
+  //Ladesäulenmarker (Zoomstufe > 9)
     async function loadCityStations(citySlug) { 
       console.log("loadCityStations called", citySlug, loadedCities);
 
@@ -281,7 +281,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       const currentZoom = map.getZoom(); 
       const bounds = map.getBounds(); 
         
-      if (currentZoom <= 10) { 
+      if (currentZoom < 10) { 
         if (!map.hasLayer(cityLayer)) map.addLayer(cityLayer); 
         if (map.hasLayer(stationsLayer)) map.removeLayer(stationsLayer); 
       } else { 

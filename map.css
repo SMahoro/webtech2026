@@ -2,7 +2,7 @@
  #mapContents {
    display: flex;
    flex-wrap: wrap;
-   height: 60vh;
+   height: 65vh;
    margin-top: 4vh;
    gap: 15px;
    font-family: sans-serif;
