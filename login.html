@@ -1,124 +1,97 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LadeSpot.de - Startseite</title>
-    <link href="styles.css" rel="stylesheet">
-    <script src="auth.js"></script>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.html">LadeSpot.de</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Startseite</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.html" >Login/Registration</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="contact.html" >Kontakt</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>LadeSpot.de - Anmelden</title>
+        <link href="styles.css" rel="stylesheet">
+        <script src="auth.js"></script>
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#">LadeSpot.de</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="index.html">Startseite</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.html">Login/Registration</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="kontakt.html">Kontakt</a>
+                        </li>
+                        <li class="nav-item logout-form">
+                            <button class="btn nav-link" type="submit" id="logout-button" onclick="logout(event)">Abmelden</button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
 
-    </div>
-
-    <!-- Login/Register Inhalt -->
-    <div id="login" class="container content active">
-        <h1>Login oder Registrierung</h1>
-        <form>
-            <div class="form-group">
-                <label for="email">E-Mail-Adresse:</label>
-                <input type="email" class="form-control" id="email" placeholder="E-Mail eingeben" required>
+            <!-- Inhalt -->
+            <div id="login" class="container content active">
+                <h1>Login oder Registrierung</h1>
+                <form>
+                    <div class="form-group">
+                        <label for="email">E-Mail-Adresse:</label>
+                        <input type="email" class="form-control" id="email" placeholder="E-Mail eingeben" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Passwort:</label>
+                        <input type="password" class="form-control" id="password" placeholder="Passwort eingeben" required>
+                    </div>
+                    <div class="form-group">
+                        <span id="login-error-box" class="display-none">Bitte prüfen Sie Ihre E-Mail und Ihr Passwort</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" onclick="login(event)">Einloggen</button>
+                    <a href="#" class="btn btn-secondary">Registrieren</a>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="password">Passwort:</label>
-                <input type="password" class="form-control" id="password" placeholder="Passwort eingeben" required>
-            </div>
-            <div class="form-group">
-                <span id="login-error-box" class="display-none">Bitte prüfen Sie Ihre E-Mail und Ihr Passwort</span>
-            </div>
-            <button type="submit" class="btn btn-primary" onclick="login(event)">Einloggen</button>
-            <a href="#" class="btn btn-secondary">Registrieren</a>
-        </form>
-    </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container p-4">
-            <div class="text-center">
-                <a href="impressum.html" id="openImpressum" class="text-dark">Impressum</a> |
-                <a href="datenschutz.html" id="openDatenschutz" class="text-dark">Datenschutz</a>
-            </div>
-        </div>
-    </footer>
+            <!-- Footer -->
+            <footer>
+                <div class="container p-4">
+                    <div class="text-center">
+                        <a href="impressum.html" id="openImpressum" class="text-dark">Impressum</a> |
+                        <a href="datenschutz.html" id="openDatenschutz" class="text-dark">Datenschutz</a>
+                    </div>
+                </div>
+            </footer>
 
-    <script defer> // -> why defer?
-        const TEST_USER = "testuser@test.de";
-        const TEST_PASSWORD = "12345";
+        <script defer> // -> why defer?
+            const TEST_USER = "testuser@test.de";
+            const TEST_PASSWORD = "12345";
 
-        const usernameInput = document.getElementById("email");
-        const passwordInput = document.getElementById("password");
-        const loginErrorBox = document.getElementById("login-error-box");
+            const usernameInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            const loginErrorBox = document.getElementById("login-error-box");
 
-        function login(e) {
-            e.preventDefault();
-
-            const enteredName = usernameInput.value.trim();
-            const enteredPassword = passwordInput.value.trim();
-            if (enteredName == TEST_USER && enteredPassword == TEST_PASSWORD) {
-                Auth.login();
-                loginErrorBox.classList.add("display-none");
-                window.location.href = "index.html";
-            } else {
-                loginErrorBox.classList.remove("display-none");
-            }
-        }
-
-        function showContent(id) {
-            document.querySelectorAll('.content').forEach(function(element) {
-                element.classList.remove('active');
-            });
-            document.getElementById(id).classList.add('active');
-        }
-
-        // Ersatz für Bootstrap Collapse (Navigation)
-        document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const target = document.querySelector(this.getAttribute('data-target'));
-                if (target) target.classList.toggle('show');
-            });
-        });
-
-        // Ersatz für Bootstrap Modals
-        document.querySelectorAll('[data-toggle="modal"]').forEach(function(trigger) {
-            trigger.addEventListener('click', function(e) {
+            function login(e) {
                 e.preventDefault();
-                const modal = document.querySelector(this.getAttribute('data-target'));
-                if (modal) {
-                    modal.style.display = 'block';
-                    setTimeout(() => modal.classList.add('show'), 10);
-                }
-            });
-        });
 
-        document.querySelectorAll('[data-dismiss="modal"]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const modal = this.closest('.modal');
-                if (modal) {
-                    modal.classList.remove('show');
-                    setTimeout(() => modal.style.display = 'none', 150);
+                const enteredName = usernameInput.value.trim();
+                const enteredPassword = passwordInput.value.trim();
+                if (enteredName == TEST_USER && enteredPassword == TEST_PASSWORD) {
+                    Auth.login();
+                    loginErrorBox.classList.add("display-none");
+                    window.location.href = "index.html";
+                } else {
+                    loginErrorBox.classList.remove("display-none");
                 }
+            }
+
+            // Navigations-Collapse 
+            document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const target = document.querySelector(this.getAttribute('data-target'));
+                    if (target) target.classList.toggle('show');
+                });
             });
-        });
-    </script>
-</body>
+
+        </script>
+    </body>
 </html>
