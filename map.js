@@ -163,14 +163,11 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
                 }
 
                 saveFavoritesToSession()
-                renderSidebar();
+                renderFavoritesList();
               } else {
                 stationMarker.bindPopup('Melde Dich an, um Favoriten zu speichern: <a href="login.html">Zum Login</a>');
-              }
-
-              
+              }              
             });
-
             stationsLayer.addLayer(stationMarker); 
           }
         });
@@ -201,7 +198,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
         heading.textContent = "Meine Favoriten";
         aside.appendChild(heading);
 
-        const ul = document.createElement("ul");
+        ul = document.createElement("ul");
         ul.id = "fav-list";
         aside.appendChild(ul);
       } else {
@@ -210,41 +207,42 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
             ul.innerHTML = "";
         }
       }
-        
-
-        /*if (favoritesMap.size === 0){
-          const li = document.createElement('li');
-          li.innerHTML = '<li class="fav-items">Noch keine Favoriten gespeichert.</li>';
-          ul.appendChild(li);
-          return;
-        }*/
       
+      if (ul) {
+        renderFavoritesList();
+      }
     }
 
-      /*if (!listElements) return; 
-      listElements.innerHTML = ''; 
-      // Hinweis anzeigen, wenn keine Favoriten vorhanden sind 
-      if (favoritesMap.size === 0) { 
-        listElements.innerHTML = '<li class="fav-items">Noch keine Favoriten gespeichert.</li>'; return; 
-      } 
-      favoritesMap.forEach((station, stationId) => { 
-        const li = document.createElement('li'); 
-        li.className = 'fav-item'; 
+    //Favoritenliste
+    function renderFavoritesList(){
+      console.log("renderFavoritesList() called")
+      const ul = document.getElementById("fav-list");
+      ul.innerHTML = "";
+
+      if (favoritesMap.size === 0){
+        const li = document.createElement('li');
+        li.className = "fav-item"
+        li.textContent = "Noch keine Favoriten gespeichert";
+        ul.appendChild(li);
+        return;
+      }
+
+      favoritesMap.forEach((station, stationId) => {
+        const li = document.createElement('li');
+        li.className = "fav-item";
         li.innerHTML = ` <b>${station.operator || 'Ladesäule'}, ID:${station.station_id || 'Unknown'}</b><br /> ${station.charging_type || ''}, ${station.post_code || ''} `; 
-        // Interaktion: Klick auf Listenelement zentriert die Karte auf die Säule & öffnet das Popup 
-        li.addEventListener('click', () =>{ if (station.lat && station.lon) { 
-          map.setView([station.lat, station.lon], 16); 
-          const marker = stationMarkersMap.get(stationId); 
-          if (marker) { marker.openPopup(); } 
+
+        li.addEventListener('click', () => { 
+          if (station.lat && station.lon) { 
+            map.setView([station.lat, station.lon], 14); 
+            const marker = stationMarkersMap.get(stationId); 
+            if (marker) { marker.openPopup(); } 
           } 
         }); 
-        listElements.appendChild(li); 
-      }); */
-    
 
-    
-      
-    
+        ul.appendChild(li);
+      });
+    }
 
     //delay für weniger heftige API-Calls
     function debounce(func, delay) { 
