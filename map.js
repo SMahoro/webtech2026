@@ -188,7 +188,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
 
       if (!aside){
         const loginAd = document.getElementById("loginAd");
-        loginAd.style.display = "none";
+        loginAd.classList.add("display-none");
 
         aside = document.createElement("aside");
         aside.id = "favorites";
@@ -200,7 +200,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
 
         const clearAllBtn = document.createElement("button");
         clearAllBtn.id = "btn-delete";
-        clearAllBtn.style.display = 'none';
+        clearAllBtn.classList.add("display-none");
         aside.appendChild(clearAllBtn);
 
         ul = document.createElement("ul");

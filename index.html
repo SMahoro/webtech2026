@@ -21,13 +21,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#" onclick="showContent('startseite')">Startseite</a>
+                    <a class="nav-link" href="index.html">Startseite</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="login.html">Login/Registration</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="contact.html" ">Kontakt</a>
+                    <a class="nav-link" href="contact.html">Kontakt</a>
                 </li>
                 <li class="nav-item logout-form">
                     <button class="btn nav-link" type="submit" id="logout-button" onclick="logout(event)">Abmelden</button>
@@ -43,29 +43,11 @@
         
         <div id="mapContents"> 
             <div id="map"></div>
-
-            <aside id="favorites"> 
-                <h2>Meine Favoriten</h2> 
-                <ul> 
-                    <li>Noch keine Favoriten gespeichert.</li> 
-                </ul> 
-            </aside>
         </div>
 
-        <h3>Legen Sie ein Konto bei uns an und speichern sie ihre Favoriten ab.</h3>
+        <h3 id="loginAd">Legen Sie ein Konto bei uns an und speichern sie ihre Favoriten ab!</h3>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container p-4">
-            <div class="text-center">
-                <a href="#" data-toggle="modal" data-target="#impressumModal" class="text-dark">Impressum</a> | 
-                <a href="#" data-toggle="modal" data-target="#datenschutzModal" class="text-dark">Datenschutz</a>
-            </div>
-        </div>
-
-        <h3 id="loginAd">Legen Sie ein Konto bei uns an und speichern sie ihre Favoriten.</h3>
-    </div>
 
     <!-- Footer -->
 <footer>
@@ -79,21 +61,17 @@
 
     <script>
         const logoutBtn = document.getElementById("logout-button");
-        const map = document.getElementById("map");
-        const favorites = document.getElementById("favorites");
-        const isLoggedInState = sessionStorage.getItem("isLoggedIn");
+
+        if(!Auth.isLoggedIn()){
+            logoutBtn.classList.add("display-none");
+        }
 
         function logout(e) {
             e.preventDefault();
-            sessionStorage.setItem("isLoggedIn", "false");
+            Auth.logout();
+
         }
 
-        if (isLoggedInState == "true") {
-            map.classList.add("display-none");
-        } else {
-            favorites.classList.add("display-none");
-            logoutBtn.classList.add("display-none");
-        }
         
         function showContent(id) {
             document.querySelectorAll('.content').forEach(function(element) {
@@ -101,19 +79,6 @@
             });
             document.getElementById(id).classList.add('active');
         }
-
-        /*document.getElementById('searchBar').addEventListener('input', function() {
-            let filter = this.value.toUpperCase();
-            let listItems = document.getElementById("stationList").getElementsByTagName('a');
-            for (let i = 0; i < listItems.length; i++) {
-                let txtValue = listItems[i].textContent || listItems[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    listItems[i].style.display = "";
-                } else {
-                    listItems[i].style.display = "none";
-                }
-            }
-        });*/
 
         // Ersatz für Bootstrap Collapse (Navigation)
         document.querySelectorAll('[data-toggle="collapse"]').forEach(function(btn) {
