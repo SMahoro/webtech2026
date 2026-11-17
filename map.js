@@ -4,7 +4,7 @@
 import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
   
   //Login-Abfrage
-    alert(Auth.isLoggedIn());
+    //alert(Auth.isLoggedIn());
 
     if (Auth.isLoggedIn()) {
       console.log("User ist eingeloggt, Favoriten können gespeichert werden.");
@@ -138,9 +138,9 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
         chargingStations.forEach(station => { 
           if (station.lat && station.lon) { 
             const stationId = station.station_id;
-            const isFav = favoritesMap.has(stationId); //Favorit?
 
             //Ladesäulenmarker
+            const isFav = favoritesMap.has(stationId);
             const stationMarker = new Marker([station.lat, station.lon], { icon: isFav ? favoriteIcon : defaultIcon });
 
             stationMarkersMap.set(stationId, stationMarker);
@@ -198,6 +198,11 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
         heading.textContent = "Meine Favoriten";
         aside.appendChild(heading);
 
+        const clearAllBtn = document.createElement("button");
+        clearAllBtn.id = "btn-delete";
+        clearAllBtn.style.display = 'none';
+        aside.appendChild(clearAllBtn);
+
         ul = document.createElement("ul");
         ul.id = "fav-list";
         aside.appendChild(ul);
@@ -216,8 +221,12 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
     //Favoritenliste
     function renderFavoritesList(){
       console.log("renderFavoritesList() called")
+
+      const clearAllBtn = document.getElementById("btn-delete");
       const ul = document.getElementById("fav-list");
+
       ul.innerHTML = "";
+      clearAllBtn.style.display = "none";
 
       if (favoritesMap.size === 0){
         const li = document.createElement('li');
@@ -241,10 +250,25 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
         }); 
 
         ul.appendChild(li);
+
+        const clearAllBtn = document.getElementById("btn-delete");
+        clearAllBtn.style.display = 'block';
+        clearAllBtn.className = 'btn-clear-all';
+        clearAllBtn.textContent = `Alle Einträge löschen (${favoritesMap.size})`;
+          
+        clearAllBtn.addEventListener('click', () => {
+          favoritesMap.clear();
+          stationMarkersMap.forEach((marker) => {
+            const isFav = favoritesMap.has(stationId);
+            marker.setIcon(isFav ? favoriteIcon : defaultIcon);
+          });
+          saveFavoritesToSession();
+          renderFavoritesList(); 
+        });
       });
     }
 
-    //delay für weniger heftige API-Calls
+    //delay für weniger häufige API-Calls
     function debounce(func, delay) { 
       let timeoutId; 
       return function (...args) { 
@@ -253,7 +277,7 @@ import {DefaultIcon, LayerGroup, LeafletMap, Marker, TileLayer} from 'leaflet';
       }; 
     }
 
-    map.on('moveend', debounce(() => {  //Nachladen der Ladesäulemarker anderer Städte, wenn sie in Sicht kommen
+    map.on('moveend', debounce(() => {
       const currentZoom = map.getZoom(); 
       const bounds = map.getBounds(); 
         

@@ -1,6 +1,6 @@
 //Hilfsfunktionen Login
 
-alert("Login-Status: " + sessionStorage.getItem('isLoggedIn'))
+//alert("Login-Status: " + sessionStorage.getItem('isLoggedIn'))
 
 if (sessionStorage.getItem('isLoggedIn') === null) {
     sessionStorage.setItem('isLoggedIn', 'false');
